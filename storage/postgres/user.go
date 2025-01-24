@@ -25,12 +25,14 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 	query := `
 		INSERT INTO users(
 			user_id,
-			user_name,
-			user_email,
-			user_password,
-			description
+			username,
+			usersurname,
+			user_number,
+			email,
+			password,
+			user_role
 		)VALUES(
-			$1, $2, $3, $4, $5
+			$1, $2, $3, $4, $5, $6, $7
 		)
 	
 		`
@@ -41,9 +43,11 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 		query,
 		id,
 		req.User_name,
+		req.User_surname,
+		req.User_number,
 		req.User_email,
 		req.Password,
-		req.Description,
+		req.User_role,
 	)
 
 	if err != nil {
@@ -51,7 +55,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 		return nil, err
 	}
 
-	resp, err := u.GetUser(ctx, id.String())
+	resp, err := u.GetUser(ctx, models.Id{Id: id.String()})
 
 	if err != nil {
 		fmt.Println(err)
@@ -61,16 +65,19 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 	return resp, nil
 }
 
-func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error) {
+func (u *UserRepo) GetUser(ctx context.Context, req models.Id) (*models.User, error) {
 
 	var resp models.User
 	query := `
 		SELECT 
 			user_id,
-			user_name,
-			user_email,
-			user_password,
-			description
+			username,
+			usersurname,
+			user_number,
+			email,
+			password,
+			user_role
+			
 		FROM
 			users
 		WHERE
@@ -83,9 +90,11 @@ func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error
 	err := row.Scan(
 		&resp.User_id,
 		&resp.User_name,
+		&resp.User_surname,
+		&resp.User_number,
 		&resp.User_email,
 		&resp.Password,
-		&resp.Description,
+		&resp.User_role,
 	)
 
 	if err != nil {
@@ -96,3 +105,22 @@ func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error
 
 	return &resp, nil
 }
+
+func (u *UserRepo) IsExists(ctx context.Context, req models.IsExists) (*models.IsExistsResp, error) {
+
+	var isExists bool
+
+	query := fmt.Sprintf("SELECT EXISTS (SELECT 1 FROM %s WHERE %s = '%s')", req.TableName, req.ClomunName, req.ExpValue)
+
+	err := u.db.QueryRow(ctx, query).Scan(&isExists)
+
+	if err != nil {
+
+		fmt.Println("err on check exists ", err)
+		return nil, err
+
+	}
+
+	return &models.IsExistsResp{IsExists: isExists}, nil
+}
+

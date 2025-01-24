@@ -1,20 +1,59 @@
 package models
 
-import "time"
+type TeacherReq struct {
+	Teacher_name    string `json:"teacher_name"`
+	Teacher_surname string `json:"teacher_surname"`
+	Teacher_number  string `json:"teacher_number"`
+	Teachers_tg     string `json:"teacher_tg"`
+	Teacher_bio     string `json:"bio"`
+	Rating          string `json:"rating"`
+}
 
-type UserReq struct {
-	User_name   string `json:"user_name"`
-	User_email  string `json:"user_email"`
-	Password    string `json:"password"`
+type Teacher struct {
+	Teacher_id      string `json:"teacher_id"`
+	Teacher_name    string `json:"teacher_name"`
+	Teacher_surname string `json:"teacher_surname"`
+	Teacher_number  string `json:"teacher_number"`
+	Teachers_tg     string `json:"teacher_tg"`
+	Teacher_bio     string `json:"bio"`
+	Rating          string `json:"rating"`
+}
+
+type CoursesReq struct {
+	Title       string `json:"title"`
+	Teacher_id  string `json:"teacher_id"`
 	Description string `json:"description"`
 }
 
-type User struct {
-	User_id     string    `json:user_id`
-	User_name   string    `json:"user_name"`
-	User_email  string    `json:"user_email"`
-	Password    string    `json:"user_password"`
-	Description string    `json:"description"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+type Course struct {
+	Course_id   string `json:"course_id"`
+	Title       string `json:"title"`
+	Teacher_id  string `json:"teacher_id"`
+	Description string `json:"description"`
 }
+
+type VideoReq struct {
+	Title     string `json:"title"`
+	Course_id string `json:"course_id"`
+}
+
+type Id struct {
+	Id string
+}
+
+type IsExists struct {
+	TableName  string
+	ClomunName string
+	ExpValue   string
+}
+
+type IsExistsResp struct {
+	IsExists bool
+	Status string
+}
+
+type Claim struct {
+	UserId   string
+	UserRole string
+}
+
