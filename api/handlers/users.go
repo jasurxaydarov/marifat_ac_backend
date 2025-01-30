@@ -25,12 +25,12 @@ func (h *Handlers) UserCreate(ctx *gin.Context) {
 	}
 
 	/*data := fmt.Sprintf(
-		`Username:%s   :
-		User Phone:%s  :
-		User Email:%s  : `,
-		resp.User_name,
-		resp.User_number,
-		resp.User_email)*/
+	`Username:%s   :
+	User Phone:%s  :
+	User Email:%s  : `,
+	resp.User_name,
+	resp.User_number,
+	resp.User_email)*/
 
 	///mail.SendAdminMail(data)
 
@@ -114,5 +114,43 @@ func (h *Handlers) CheckUser(ctx *gin.Context) {
 		Status:  "registr",
 		Message: "we sent otp your email",
 	})
+
+}
+
+func (h *Handlers) SignUp(ctx *gin.Context) {
+
+	var otpData models.UserOtpData
+
+	var reqBody models.UserReq
+
+	err := ctx.BindJSON(&reqBody)
+	if err != nil {
+
+		fmt.Println("err on BindJSON", err)
+		ctx.JSON(401, err.Error())
+		return
+	}
+
+	otpSData,err:=h.cache.GetDell(ctx,reqBody.User_email)
+
+	if err!=nil{
+		fmt.Println("h.cache.GetDell",err)
+		ctx.JSON(500,err.Error())
+		return
+	}
+
+	if otpSData==""{
+
+		ctx.JSON(201,"otp code is expired")
+		return
+	}
+
+	err=json.Unmarshal([]byte(otpSData),&otpData.Otp)
+
+	if otpData.Otp!=reqBody.Otp{
+
+		ctx.JSON(405,"incorrect otp code")
+		return
+	}
 
 }

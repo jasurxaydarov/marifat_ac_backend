@@ -9,6 +9,8 @@ type UserReq struct {
 	Password     string `json:"password"`
 	User_number  string `json:"user_number"`
 	User_role    string `json:"user_role"`
+	Otp          string    `json:"otp"`
+
 }
 type User struct {
 	User_id      string    `json:"user_id"`
@@ -21,11 +23,11 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-type UserIsExists struct{
+type UserIsExists struct {
 	UserEmail string `json:"email"`
 }
 
-type UserOtpData struct{
-	Otp string
+type UserOtpData struct {
+	Otp   string
 	Email string
 }

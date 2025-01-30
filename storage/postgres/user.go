@@ -55,7 +55,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 		return nil, err
 	}
 
-	resp, err := u.GetUser(ctx, models.Id{Id: id.String()})
+	resp, err := u.GetUser(ctx, id.String())
 
 	if err != nil {
 		fmt.Println(err)
@@ -65,7 +65,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 	return resp, nil
 }
 
-func (u *UserRepo) GetUser(ctx context.Context, req models.Id) (*models.User, error) {
+func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error) {
 
 	var resp models.User
 	query := `

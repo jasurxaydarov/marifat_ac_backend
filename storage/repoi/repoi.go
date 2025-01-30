@@ -8,7 +8,7 @@ import (
 
 type UserRepoI interface {
 	CreateUser(ctx context.Context, req models.UserReq) (*models.User, error)
-	GetUser(ctx context.Context, req models.Id) (*models.User, error)
+	GetUser(ctx context.Context, req string) (*models.User, error)
 	IsExists(ctx context.Context,req models.IsExists)(*models.IsExistsResp,error)
 }
 
