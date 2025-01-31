@@ -149,6 +149,7 @@ func (h *Handlers) SignUp(ctx *gin.Context) {
 
 	if otpData.Otp!=reqBody.Otp{
 
+		
 		ctx.JSON(405,"incorrect otp code")
 		return
 	}
