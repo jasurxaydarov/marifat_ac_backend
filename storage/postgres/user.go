@@ -2,11 +2,13 @@ package postgres
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jasurxaydarov/marifat_ac_backend/models"
+	"github.com/jasurxaydarov/marifat_ac_backend/pgx/helpers"
 	"github.com/jasurxaydarov/marifat_ac_backend/storage/repoi"
 )
 
@@ -19,6 +21,7 @@ func NewUserREpo(db *pgx.Conn) repoi.UserRepoI {
 	return &UserRepo{db: db}
 }
 
+// Create users
 func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.User, error) {
 	var id uuid.UUID
 
@@ -65,6 +68,7 @@ func (u *UserRepo) CreateUser(ctx context.Context, req models.UserReq) (*models.
 	return resp, nil
 }
 
+// Get user By Id
 func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error) {
 
 	var resp models.User
@@ -106,6 +110,71 @@ func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error
 	return &resp, nil
 }
 
+
+
+// Get users by list
+func (u *UserRepo) GetUsers(ctx context.Context, req models.GetList) (*models.UserList, error) {
+
+	offset := (req.Page - 1) * req.Limit
+
+	var resp models.User
+
+	var res models.UserList
+
+
+	query:=`
+		SELECT 
+			user_id,
+			username,
+			usersurname,
+			user_number,
+			email,
+			password,
+			user_role
+		FROM 
+    		users
+		LIMIT $1 OFFSET $2;
+	`
+
+	row,err:=u.db.Query(
+		ctx,
+		query,
+		req.Limit,
+		offset,
+	)
+
+	if err!=nil{
+		fmt.Println("err on get users list Query ", err.Error())
+		return nil,err
+	}
+
+	for row.Next(){
+
+		row.Scan(
+			&resp.User_id,
+			&resp.User_name,
+			&resp.User_surname,
+			&resp.User_number,
+			&resp.User_email,
+			&resp.Password,
+			&resp.User_number,
+			
+		)
+
+		if err!=nil{
+			fmt.Println("err 0n get user list row.Scan ",err.Error())
+			return nil,err
+		}
+
+		res.Count++
+
+		res.User=append(res.User, resp)
+
+	}
+	return &res, nil
+}
+
+// Check user is exists or not
 func (u *UserRepo) IsExists(ctx context.Context, req models.IsExists) (*models.IsExistsResp, error) {
 
 	var isExists bool
@@ -124,3 +193,45 @@ func (u *UserRepo) IsExists(ctx context.Context, req models.IsExists) (*models.I
 	return &models.IsExistsResp{IsExists: isExists}, nil
 }
 
+// User login
+func (u *UserRepo) LogIn(ctx context.Context, req models.UserLogIn) (*models.Claim, error) {
+
+	var userId, gmail, hashPassword, userRole string
+
+	query := `
+		SELECT
+			user_id,
+			email,
+			password,
+			user_role
+		FROM
+			users
+		WHERE	
+			email =$1
+	`
+
+	err := u.db.QueryRow(
+		ctx,
+		query,
+		req.User_email,
+	).Scan(
+		&userId,
+		&gmail,
+		&hashPassword,
+		&userRole,
+	)
+
+	if err != nil {
+
+		fmt.Println("err on login QueryRow", err.Error())
+		return nil, err
+	}
+
+	if !helpers.CompareHashPassword(hashPassword, req.Password) {
+
+		return nil, errors.New("user password is incorrect")
+
+	}
+
+	return &models.Claim{UserId: userId, UserRole: userRole}, nil
+}

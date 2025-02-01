@@ -8,6 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jasurxaydarov/marifat_ac_backend/mail"
 	"github.com/jasurxaydarov/marifat_ac_backend/models"
+	"github.com/jasurxaydarov/marifat_ac_backend/pgx/helpers"
+	"github.com/jasurxaydarov/marifat_ac_backend/token"
 )
 
 func (h *Handlers) UserCreate(ctx *gin.Context) {
@@ -131,27 +133,114 @@ func (h *Handlers) SignUp(ctx *gin.Context) {
 		return
 	}
 
-	otpSData,err:=h.cache.GetDell(ctx,reqBody.User_email)
+	otpSData, err := h.cache.GetDell(ctx, reqBody.User_email)
 
-	if err!=nil{
-		fmt.Println("h.cache.GetDell",err)
-		ctx.JSON(500,err.Error())
+	fmt.Println(otpSData)
+
+	if err != nil {
+		fmt.Println("h.cache.GetDell", err)
+		ctx.JSON(500, err.Error())
 		return
 	}
 
-	if otpSData==""{
+	if otpSData == "" {
 
-		ctx.JSON(201,"otp code is expired")
+		ctx.JSON(201, "otp code is expired")
 		return
 	}
 
-	err=json.Unmarshal([]byte(otpSData),&otpData.Otp)
+	err = json.Unmarshal([]byte(otpSData), &otpData)
 
-	if otpData.Otp!=reqBody.Otp{
+	if otpData.Otp != reqBody.Otp {
 
-		
-		ctx.JSON(405,"incorrect otp code")
+		ctx.JSON(405, "incorrect otp code")
 		return
 	}
 
+	reqBody.Password, err = helpers.HashPassword(reqBody.Password)
+
+	claim, err := h.storage.UserRepo().CreateUser(context.Background(), reqBody)
+
+	accessToken, err := token.GenerateJWT(*&models.Claim{UserId: claim.User_id, UserRole: claim.User_role})
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+
+		return
+	}
+
+	ctx.JSON(201, accessToken)
+}
+
+func (h *Handlers) LogIn(ctx *gin.Context) {
+
+	var reqBody models.UserLogIn
+
+	err := ctx.BindJSON(&reqBody)
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+	claim, err := h.storage.UserRepo().LogIn(context.Background(), reqBody)
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	accessToken, err := token.GenerateJWT(*claim)
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	ctx.JSON(201, accessToken)
+
+}
+
+func (h *Handlers) GetUserById(ctx *gin.Context) {
+
+	var req models.GetById
+
+	req.Id = ctx.Param("id")
+
+	resp, err := h.storage.UserRepo().GetUser(context.Background(), req.Id)
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	ctx.JSON(200, resp)
+
+}
+
+func (h *Handlers) GetUsers(ctx *gin.Context) {
+	var req models.GetList
+
+	err := ctx.BindJSON(&req)
+
+	if err != nil {
+
+		fmt.Println("err on BindJSON", err.Error())
+		ctx.JSON(401, err.Error())
+		return
+	}
+
+	resp,err:=h.storage.UserRepo().GetUsers(context.Background(),req)
+	
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	ctx.JSON(200,resp)
 }

@@ -17,6 +17,13 @@ func Api(storage storage.StorageI,cache redis.RedisRepoI) {
 
 	router.POST("/user", h.UserCreate)
 	router.POST("/user-check", h.CheckUser)
+	router.POST("/singup", h.SignUp)
+	router.POST("/login", h.LogIn)
+	router.GET("/user/:id",h.GetUserById)
+	router.POST("/users", h.GetUsers)
+
+
+
 
 
 	router.Run(":8080")

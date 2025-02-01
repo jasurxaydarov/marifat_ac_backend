@@ -29,7 +29,7 @@ func GenerateJWT(claim models.Claim) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwtClaim)
 
 	tokenString, err := token.SignedString(secretJwtKey)
-
+	
 	if err != nil {
 		return "", err
 	}
