@@ -259,14 +259,14 @@ func (u *UserRepo) ForReq(ctx context.Context, req models.For_req) (*models.For_
 		return nil, err
 	}
 
-	resp,err:=u.GetForReq(ctx,models.Id{Id: req.Data_id})
-	
+	resp, err := u.GetForReq(ctx, models.Id{Id: req.Data_id})
+
 	if err != nil {
 
 		fmt.Println("err on get  GetForReq", err.Error())
 		return nil, err
 	}
-	
+
 	return resp, nil
 }
 
@@ -274,7 +274,7 @@ func (u *UserRepo) GetForReq(ctx context.Context, req models.Id) (*models.For_re
 
 	var resp models.For_req
 
-	query:=`
+	query := `
 		SELECT 
 			data_id,
 			name,
@@ -288,21 +288,21 @@ func (u *UserRepo) GetForReq(ctx context.Context, req models.Id) (*models.For_re
 
 	`
 
-	err:=u.db.QueryRow(
+	err := u.db.QueryRow(
 		ctx,
 		query,
 		req.Id,
-		).Scan(
-			&resp.Data_id,
-			&resp.Name,
-			&resp.Number,
-			&resp.Description,
-		)
+	).Scan(
+		&resp.Data_id,
+		&resp.Name,
+		&resp.Number,
+		&resp.Description,
+	)
 
-	if err!=nil{
-		fmt.Println("err on db GetForReq",err.Error())
+	if err != nil {
+		fmt.Println("err on db GetForReq", err.Error())
 
-		return nil,err
+		return nil, err
 	}
 
 	return &resp, nil

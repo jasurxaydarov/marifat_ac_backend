@@ -17,6 +17,6 @@ type UserRepoI interface {
 }
 
 type TeacherRepoI interface {
-	CreateUser(ctx context.Context, req models.UserReq) (*models.User, error)
-	GetUser(ctx context.Context, req models.Id) (*models.User, error)
+	CreateTeacher(ctx context.Context, req models.TeacherReq) (*models.Teacher, error)
+	GetTeacher(ctx context.Context, req models.Id) (*models.Teacher, error)
 }

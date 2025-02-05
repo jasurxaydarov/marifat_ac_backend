@@ -8,10 +8,12 @@ import (
 
 type StorageI interface {
 	UserRepo() repoi.UserRepoI
+	TeacherRepo() repoi.TeacherRepoI
 }
 
 type storage struct {
-	userRepo repoi.UserRepoI
+	userRepo    repoi.UserRepoI
+	teacherRepo repoi.TeacherRepoI
 }
 
 func NewStorage(db *pgx.Conn) StorageI {
@@ -24,4 +26,8 @@ func NewStorage(db *pgx.Conn) StorageI {
 func (s *storage) UserRepo() repoi.UserRepoI {
 
 	return s.userRepo
+}
+
+func (s *storage) TeacherRepo() repoi.TeacherRepoI {
+	return s.teacherRepo
 }
