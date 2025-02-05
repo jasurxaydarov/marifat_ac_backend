@@ -72,3 +72,9 @@ CREATE TABLE view_counts (
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
+CREATE TABLE for_req (
+    data_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(100) NOT NULL,
+    number VARCHAR(9) NOT NULL,
+    description TEXT
+);

@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type UserReq struct {
 	User_name    string `json:"username"`
@@ -22,7 +24,7 @@ type User struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 type UserList struct {
-	User []User
+	User  []User
 	Count int `json:"count"`
 }
 type UserIsExists struct {
@@ -37,4 +39,11 @@ type UserOtpData struct {
 type UserLogIn struct {
 	User_email string `json:"email"`
 	Password   string `json:"password"`
+}
+
+type For_req struct {
+	Data_id     string `json:"data_id"`
+	Name        string `json:"name"`
+	Number      string `json:"number"`
+	Description string `json:"description"`
 }

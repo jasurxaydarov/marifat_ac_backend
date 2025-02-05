@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"github.com/jasurxaydarov/marifat_ac_backend/mail"
 	"github.com/jasurxaydarov/marifat_ac_backend/models"
 	"github.com/jasurxaydarov/marifat_ac_backend/pgx/helpers"
@@ -234,13 +235,63 @@ func (h *Handlers) GetUsers(ctx *gin.Context) {
 		return
 	}
 
-	resp,err:=h.storage.UserRepo().GetUsers(context.Background(),req)
-	
+	resp, err := h.storage.UserRepo().GetUsers(context.Background(), req)
+
 	if err != nil {
 
 		ctx.JSON(500, err.Error())
 		return
 	}
 
-	ctx.JSON(200,resp)
+	ctx.JSON(200, resp)
+}
+
+func (h *Handlers) CreateForReq(ctx *gin.Context) {
+
+	var req models.For_req
+
+	err := ctx.BindJSON(&req)
+
+	if err != nil {
+
+		fmt.Println("err on CreateForReq in BindJSON", err)
+		ctx.JSON(401, err.Error())
+		return
+	}
+
+	req.Data_id = uuid.New().String()
+
+	resp, err := h.storage.UserRepo().ForReq(context.Background(), req)
+
+	if err != nil {
+
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	emaildata := fmt.Sprintf(
+		`Assalomu allaykum admin bizda yangi user request bor:
+
+		User Name : " %s ",
+		User Number : " %s ",
+		User Commet : " %s ",
+		User ID : " %s ",
+	
+		`,
+		resp.Name,
+		resp.Number,
+		resp.Description,
+		resp.Data_id,
+	)
+
+	err = mail.SendAdminMail(emaildata)
+
+	if err != nil {
+
+		fmt.Println("err on err=mail.SendAdminMail(emaildata) in For req", err.Error())
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	ctx.JSON(201, resp)
 }

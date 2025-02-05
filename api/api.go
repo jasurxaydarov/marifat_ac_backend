@@ -21,6 +21,8 @@ func Api(storage storage.StorageI,cache redis.RedisRepoI) {
 	router.POST("/login", h.LogIn)
 	router.GET("/user/:id",h.GetUserById)
 	router.POST("/users", h.GetUsers)
+	router.POST("/for_req", h.CreateForReq)
+
 
 
 

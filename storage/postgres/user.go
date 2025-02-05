@@ -110,8 +110,6 @@ func (u *UserRepo) GetUser(ctx context.Context, req string) (*models.User, error
 	return &resp, nil
 }
 
-
-
 // Get users by list
 func (u *UserRepo) GetUsers(ctx context.Context, req models.GetList) (*models.UserList, error) {
 
@@ -121,8 +119,7 @@ func (u *UserRepo) GetUsers(ctx context.Context, req models.GetList) (*models.Us
 
 	var res models.UserList
 
-
-	query:=`
+	query := `
 		SELECT 
 			user_id,
 			username,
@@ -136,19 +133,19 @@ func (u *UserRepo) GetUsers(ctx context.Context, req models.GetList) (*models.Us
 		LIMIT $1 OFFSET $2;
 	`
 
-	row,err:=u.db.Query(
+	row, err := u.db.Query(
 		ctx,
 		query,
 		req.Limit,
 		offset,
 	)
 
-	if err!=nil{
+	if err != nil {
 		fmt.Println("err on get users list Query ", err.Error())
-		return nil,err
+		return nil, err
 	}
 
-	for row.Next(){
+	for row.Next() {
 
 		row.Scan(
 			&resp.User_id,
@@ -158,17 +155,16 @@ func (u *UserRepo) GetUsers(ctx context.Context, req models.GetList) (*models.Us
 			&resp.User_email,
 			&resp.Password,
 			&resp.User_number,
-			
 		)
 
-		if err!=nil{
-			fmt.Println("err 0n get user list row.Scan ",err.Error())
-			return nil,err
+		if err != nil {
+			fmt.Println("err 0n get user list row.Scan ", err.Error())
+			return nil, err
 		}
 
 		res.Count++
 
-		res.User=append(res.User, resp)
+		res.User = append(res.User, resp)
 
 	}
 	return &res, nil
@@ -234,4 +230,80 @@ func (u *UserRepo) LogIn(ctx context.Context, req models.UserLogIn) (*models.Cla
 	}
 
 	return &models.Claim{UserId: userId, UserRole: userRole}, nil
+}
+
+func (u *UserRepo) ForReq(ctx context.Context, req models.For_req) (*models.For_req, error) {
+
+	query := `
+		INSERT INTO for_req(
+			data_id,
+			name,
+			number,
+			description
+		)VALUES(
+			$1, $2, $3, $4
+		)
+	`
+
+	_, err := u.db.Exec(
+		ctx, query,
+		req.Data_id,
+		req.Name,
+		req.Number,
+		req.Description,
+	)
+
+	if err != nil {
+
+		fmt.Println("err on create  ForReq", err.Error())
+		return nil, err
+	}
+
+	resp,err:=u.GetForReq(ctx,models.Id{Id: req.Data_id})
+	
+	if err != nil {
+
+		fmt.Println("err on get  GetForReq", err.Error())
+		return nil, err
+	}
+	
+	return resp, nil
+}
+
+func (u *UserRepo) GetForReq(ctx context.Context, req models.Id) (*models.For_req, error) {
+
+	var resp models.For_req
+
+	query:=`
+		SELECT 
+			data_id,
+			name,
+			number,
+			description
+
+		FROM
+			for_req
+		WHERE
+			data_id =$1
+
+	`
+
+	err:=u.db.QueryRow(
+		ctx,
+		query,
+		req.Id,
+		).Scan(
+			&resp.Data_id,
+			&resp.Name,
+			&resp.Number,
+			&resp.Description,
+		)
+
+	if err!=nil{
+		fmt.Println("err on db GetForReq",err.Error())
+
+		return nil,err
+	}
+
+	return &resp, nil
 }

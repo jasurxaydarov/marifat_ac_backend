@@ -12,8 +12,8 @@ func SendAdminMail(otp string) error {
 		fromGmail = "xaydarovjasur6999@gmail.com"
 		password  = "pzlt skhd nvgq fxks"
 	)
-
-	var to []string = []string{"nodirxaydarov911@gmail.com"}
+//nodirxaydarov911@gmail.com
+	var to []string = []string{"xaydarovjasur6999@gmail.com"}
 	smsHost := "smtp.gmail.com"
 	port := "587"
 
